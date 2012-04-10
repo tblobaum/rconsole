@@ -12,7 +12,8 @@
     "test": "make test"
   },
   "dependencies": {
-    "colors": "~0.6.0-1"
+    "colors": "~0.6.0-1",
+    "bindings": "*"
   },
   "main": "rconsole.js",
   "devDependencies": {},
