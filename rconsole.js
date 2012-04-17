@@ -228,8 +228,8 @@ function send (severity, msg) {
   output(severity, msg, msg.length)
 
   // this should probably be 1024
-  if (msg.length > 32768)
-    throw new Error('maximum log length is 32768 bytes')
+  if (msg.length > 1024)
+    throw new Error('maximum log length is 1024 bytes')
 
   if (rc.syslog) {
     // add a hashtag based on the severity level
@@ -314,5 +314,7 @@ function defined () {
     if (typeof arguments[i] !== 'undefined') 
       return arguments[i]
 }
+
+rc.set()
 
 module.exports = rc
