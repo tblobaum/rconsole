@@ -67,7 +67,7 @@ class Syslog {
     char message[ args[1]->ToString()->Length() ];
     args[1]->ToString()->WriteAscii((char*) &message);
 
-    syslog (severity->Int32Value(), message);
+    syslog (severity->Int32Value(), "%s", message);
 
     return scope.Close(Number::New(args[1]->ToString()->Length() ));
   }
