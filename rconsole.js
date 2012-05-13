@@ -70,11 +70,11 @@ colors.setTheme({
   emerg: 'red'
   , alert: 'red'
   , crit: 'red'
-  , error: 'magenta'
-  , warning: 'magenta'
-  , warn: 'magenta'
+  , error: 'red'
+  , warning: 'yellow'
+  , warn: 'yellow'
   , notice: 'cyan'
-  , info: 'cyan'
+  , info: 'green'
   , debug: 'bold'
   , trace: 'bold'
   , dir: 'bold'
@@ -188,13 +188,14 @@ rc.stream = function (level) {
 }
 
 /**
- * Send `msg` to stdio with label `level`
+ * Output `msg` to stdio with label `level`
  *
  * @param {String} level
  * @param {String} msg
  * @return {undefined}
  * @api private
  */
+var tagCache = {}
 
 function output (level, msg) {
   var time = ''
@@ -205,8 +206,9 @@ function output (level, msg) {
     msg = formatIf(rc.showTime, '%s %s', [d, msg], msg)
 
     // display tags in terminal
-    var s = prependUntilLength(level, 6, ' ')
-    msg = formatIf(rc.showTags, '%s %s', [s[level], msg], msg)
+    tagCache[level] = tagCache[level] || prependUntilLength(level, 6, ' ')
+
+    msg = formatIf(rc.showTags, '%s %s', [ tagCache[level][level], msg ], msg)
 
     // write to stdout or stderr, but not both
     if (rc.stdout)
@@ -229,16 +231,14 @@ function send (severity, msg) {
 
   // this should probably be 1024
   if (msg.length > 1024)
-    throw new Error('maximum log length is 1024 bytes')
+    process.stderr.write(new Error('maximum log length is 1024 bytes') +'\n')
 
   if (rc.syslog) {
     // add a hashtag based on the severity level
     msg = formatIf(rc.syslogHashTags, '#%s %s', [severity, msg], msg)
-    // send the log to syslog.cc and return the length of the message 
-    len = bindings.log(sev[severity], msg)
+    // send the log to syslog 
+    bindings.log(sev[severity], msg)
 
-    if (msg.length !== len)
-      throw new Error('syslog('+len+') did not return the same length for message('+msg.length+')')
   }
 }
 
