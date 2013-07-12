@@ -63,5 +63,7 @@ extern "C" {
     NODE_SET_METHOD(target, "exit", exit);
     NODE_SET_METHOD(target, "log", log);
   }
+  
+  NODE_MODULE(syslog, init)
 
 }
