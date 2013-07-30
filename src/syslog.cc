@@ -30,38 +30,36 @@ using namespace std;
 using namespace node;
 using namespace v8;
 
-extern "C" {
+char title[1024];
 
-  char title[1024];
+static v8::Handle<v8::Value> open(const v8::Arguments& args) {
+  args[0]->ToString()->WriteAscii((char*) &title);
+  int facility = args[1]->ToInteger()->Int32Value();
+  int log_upto = args[2]->ToInteger()->Int32Value();
+  setlogmask(LOG_UPTO(log_upto));
+  openlog(title, LOG_PID | LOG_NDELAY, facility);
 
-  static v8::Handle<v8::Value> open(const v8::Arguments& args) {
-    args[0]->ToString()->WriteAscii((char*) &title);
-    int facility = args[1]->ToInteger()->Int32Value();
-    int log_upto = args[2]->ToInteger()->Int32Value();
-    setlogmask(LOG_UPTO(log_upto));
-    openlog(title, LOG_PID | LOG_NDELAY, facility);
-
-    return String::New("true");
-  }
-
-  static v8::Handle<v8::Value> exit(const v8::Arguments& args) {
-    closelog();
-
-    return String::New("true");
-  }
-
-  static v8::Handle<v8::Value> log(const v8::Arguments& args) {
-    int severity = args[0]->ToInteger()->Int32Value();
-    v8::String::Utf8Value message(args[1]->ToString());
-    syslog(severity, "%s", *message );
-
-    return String::New("true");
-  }
-
-  void init(v8::Handle<v8::Object> target) {
-    NODE_SET_METHOD(target, "open", open);
-    NODE_SET_METHOD(target, "exit", exit);
-    NODE_SET_METHOD(target, "log", log);
-  }
-
+  return String::New("true");
 }
+
+static v8::Handle<v8::Value> exit(const v8::Arguments& args) {
+  closelog();
+
+  return String::New("true");
+}
+
+static v8::Handle<v8::Value> log(const v8::Arguments& args) {
+  int severity = args[0]->ToInteger()->Int32Value();
+  v8::String::Utf8Value message(args[1]->ToString());
+  syslog(severity, "%s", *message );
+
+  return String::New("true");
+}
+
+void init(v8::Handle<v8::Object> target) {
+  NODE_SET_METHOD(target, "open", open);
+  NODE_SET_METHOD(target, "exit", exit);
+  NODE_SET_METHOD(target, "log", log);
+}
+
+NODE_MODULE(syslog, init)
