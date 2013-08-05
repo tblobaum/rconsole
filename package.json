@@ -2,7 +2,7 @@
   "author": "Thomas Blobaum <tblobaum@gmail.com> (https://github.com/tblobaum/)",
   "name": "rconsole",
   "description": "'syslog.h' bindings with a revised console module",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "homepage": "https://github.com/tblobaum/rconsole",
   "repository": {
     "type": "git",
