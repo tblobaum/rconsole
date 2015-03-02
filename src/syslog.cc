@@ -32,28 +32,34 @@ using namespace v8;
 
 char title[1024];
 
-static v8::Handle<v8::Value> open(const v8::Arguments& args) {
-  args[0]->ToString()->WriteAscii((char*) &title);
+void open(const FunctionCallbackInfo<v8::Value>& args) {
+  args[0]->ToString()->WriteUtf8((char*) &title);
   int facility = args[1]->ToInteger()->Int32Value();
   int log_upto = args[2]->ToInteger()->Int32Value();
   setlogmask(LOG_UPTO(log_upto));
   openlog(title, LOG_PID | LOG_NDELAY, facility);
 
-  return String::New("true");
+  v8::Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
 }
 
-static v8::Handle<v8::Value> exit(const v8::Arguments& args) {
+void exit(const FunctionCallbackInfo<v8::Value>& args) {
   closelog();
 
-  return String::New("true");
+  v8::Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
 }
 
-static v8::Handle<v8::Value> log(const v8::Arguments& args) {
+void log(const FunctionCallbackInfo<v8::Value>& args) {
   int severity = args[0]->ToInteger()->Int32Value();
   v8::String::Utf8Value message(args[1]->ToString());
   syslog(severity, "%s", *message );
 
-  return String::New("true");
+  v8::Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
 }
 
 void init(v8::Handle<v8::Object> target) {
