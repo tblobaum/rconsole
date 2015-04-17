@@ -118,11 +118,13 @@ process.on('exit', function () {
 
 function showLineAndFile (bool, msg) {
   var bool = rc.showLine || rc.showFile
-  msg = formatIf(bool, '%s%s', ['] ', msg], msg)
-  msg = formatIf(rc.showLine, '%s%s', [__stack[2].getLineNumber(), msg], msg)
-  msg = formatIf((rc.showLine && rc.showFile), '%s%s', [':', msg], msg)
-  msg = formatIf(rc.showFile, '%s%s', [__stack[2].getFileName().replace(process.cwd() +'/', ''), msg], msg)
-  msg = formatIf(bool, '%s%s', ['[', msg], msg)
+  if ( bool ) {
+    msg = formatIf(bool, '%s%s', ['] ', msg], msg)
+    msg = formatIf(rc.showLine, '%s%s', [__stack[2].getLineNumber(), msg], msg)
+    msg = formatIf((rc.showLine && rc.showFile), '%s%s', [':', msg], msg)
+    msg = formatIf(rc.showFile, '%s%s', [__stack[2].getFileName().replace(process.cwd() +'/', ''), msg], msg)
+    msg = formatIf(bool, '%s%s', ['[', msg], msg)
+  }
   return msg
 }
 
