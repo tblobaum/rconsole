@@ -25,6 +25,7 @@
 #include <node.h>
 #include <syslog.h>
 #include <string>
+#include <nan.h>
 
 using namespace std;
 using namespace node;
@@ -33,15 +34,15 @@ using namespace v8;
 char title[1024];
 
 void open(const FunctionCallbackInfo<v8::Value>& args) {
-  args[0]->ToString()->WriteUtf8((char*) &title);
-  int facility = args[1]->ToInteger()->Int32Value();
-  int log_upto = args[2]->ToInteger()->Int32Value();
+  v8::Isolate* isolate = args.GetIsolate();
+  args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())->WriteUtf8(isolate, (char*) &title);
+  int32_t facility = args[1]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+  int32_t log_upto = args[2]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
   setlogmask(LOG_UPTO(log_upto));
   openlog(title, LOG_PID | LOG_NDELAY, facility);
 
-  v8::Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, "true", v8::NewStringType::kNormal).ToLocalChecked());
 }
 
 void exit(const FunctionCallbackInfo<v8::Value>& args) {
@@ -49,20 +50,21 @@ void exit(const FunctionCallbackInfo<v8::Value>& args) {
 
   v8::Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, "true", v8::NewStringType::kNormal).ToLocalChecked());
 }
 
 void log(const FunctionCallbackInfo<v8::Value>& args) {
-  int severity = args[0]->ToInteger()->Int32Value();
-  v8::String::Utf8Value message(args[1]->ToString());
+  v8::Isolate* isolate = args.GetIsolate();
+
+  int32_t severity = args[0]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+  v8::String::Utf8Value message(isolate, args[1]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
   syslog(severity, "%s", *message );
 
-  v8::Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "true"));
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, "true", v8::NewStringType::kNormal).ToLocalChecked());
 }
 
-void init(v8::Handle<v8::Object> target) {
+void init(v8::Local<v8::Object> target) {
   NODE_SET_METHOD(target, "open", open);
   NODE_SET_METHOD(target, "exit", exit);
   NODE_SET_METHOD(target, "log", log);

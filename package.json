@@ -13,8 +13,9 @@
     "install": "node-gyp rebuild"
   },
   "dependencies": {
+    "bindings": "*",
     "colors": "~0.6.0-1",
-    "bindings": "*"
+    "nan": "^2.14.1"
   },
   "main": "rconsole.js",
   "devDependencies": {},
